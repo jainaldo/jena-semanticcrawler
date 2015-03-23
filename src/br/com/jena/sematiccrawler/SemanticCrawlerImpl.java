@@ -18,49 +18,86 @@ public class SemanticCrawlerImpl implements SemanticCrawler {
 
 	@Override
 	public void search(Model graph, String resourceURI) {
+		uriVisitadas.add(resourceURI);
+		System.out.println("[Adicionado na lista] " + resourceURI);
 		Model model = ModelFactory.createDefaultModel();
 		model.read(resourceURI);
 		StmtIterator tripasURISujeito = model.listStatements(
-				model.createResource(resourceURI), (Property) null,
-				(RDFNode) null);
+				model.createResource(resourceURI), (Property) null,(RDFNode) null);
 		graph.add(tripasURISujeito);
-		StmtIterator tripasSameAs = model.listStatements((Resource) null,
-				OWL.sameAs, (RDFNode) null);
-
-		if (uriVisitadas.contains(resourceURI)) {
-			return;
-		} else {
-			uriVisitadas.add(resourceURI);
-			System.out.println("[na lista]" + resourceURI);
-
+		System.out.println("[Grafo] " + resourceURI);
+		StmtIterator tripasSameAs = model.listStatements((Resource) null,OWL.sameAs, (RDFNode) null);
+		if(tripasSameAs.hasNext()){
 			for (Statement tripa : tripasSameAs.toList()) {
-				System.out.println("###### " + resourceURI + " #######");
+				System.out.println(">>>>> " + resourceURI + " <<<<<");
 				Resource sujeito = tripa.getSubject();
 				Resource objeto = (Resource) (tripa.getObject());
-				if ((sujeito.getURI().equals(resourceURI))
-						&& (enc.canEncode(objeto.getURI()))) {
-					System.out.println("[dereferenciado -objeto]"
-							+ objeto.getURI());
-					try {
-						search(graph, objeto.getURI());
-					} catch (Exception e) {
-						continue;
-					}
-				} else {
-					if ((objeto.getURI().equals(resourceURI))
-							&& (enc.canEncode(sujeito.getURI()))) {
-						System.out.println("[dereferenciado - sujeito]"
-								+ sujeito.getURI());
-						try {
-							search(graph, sujeito.getURI());
-						} catch (Exception e) {
+				if (sujeito.getURI().equals(resourceURI)) {
+					if (objeto.isAnon()){
+						noBrancoSearch(graph, model, objeto);
+					}else{
+						if (enc.canEncode(objeto.getURI())){
+							if (uriVisitadas.contains(objeto.getURI())){
+								System.out.println("[Uri Objeto, já foi visitada] " + objeto.getURI());
+								continue;
+							}else{
+								System.out.println("[Dereferenciando -objeto]"+ objeto.getURI());
+								try {
+									search(graph, objeto.getURI());
+								} catch (Exception e) {
+									continue;
+								}
+							}
+						} else {
+							System.out.println("[Não - Derenfenciado devido Objeto] " + tripa);
 							continue;
 						}
+					}
+				} else {
+					if (objeto.getURI().equals(resourceURI)) {
+						if (sujeito.isAnon()){
+							noBrancoSearch(graph, model, sujeito);
+						}else{
+							if (enc.canEncode(sujeito.getURI())){
+								if (uriVisitadas.contains(sujeito.getURI())){
+									System.out.println("[Uri Sujeito, já foi visitada] " + sujeito.getURI());
+									continue;
+								}else{
+									System.out.println("[Dereferenciando - sujeito]"
+											+ sujeito.getURI());
+									try {
+										search(graph, sujeito.getURI());
+									} catch (Exception e) {
+										continue;
+									}
+								}
+							}else{
+								System.out.println("[Não - derenfenciado devido sujeito] " + tripa);
+								continue;
+							}
+						}
 					} else {
-						System.err.println("[Não]" + tripa.getResource());
+						System.out.println("[Não - derenfenciado devido não está no padrão] "+ resourceURI+ " -> "+ tripa);
+						continue;
 					}
 				}
 			}
+		}else{
+			System.out.println("[Não tem sameAs] " + resourceURI);
 		}
 	}
+
+	public void noBrancoSearch(Model graph, Model modelAtual, Resource noBranco){
+		System.out.println("[NO EM BRANCO]" + noBranco.getId() );
+		StmtIterator tripasNoBranco =  modelAtual.listStatements((Resource)noBranco.getId(), (Property) null, (RDFNode) null);
+		graph.add(tripasNoBranco);
+
+		for (Statement tripa : tripasNoBranco.toList()){
+			Resource objeto = (Resource) (tripa.getObject());
+			if (objeto.isAnon()){
+				noBrancoSearch(graph, modelAtual, objeto);
+			}
+		}
+	}
+
 }
