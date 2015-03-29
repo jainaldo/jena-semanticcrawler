@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:foaf="http://xmlns.com/foaf/0.1/">
+
+    <rdf:Description rdf:about="file://home/jainaldo/test.rdf">
+        <foaf:name>Federer, Roger</foaf:name>
+        <foaf:age>90</foaf:age>
+        <owl:sameAs rdf:nodeID="abc"/>
+        <owl:sameAs rdf:nodeID="ghi"/>
+        <owl:sameAs rdf:resource="http://dbpedia.org/resource/Zico"/>
+    </rdf:Description>
+
+    <rdf:Description rdf:nodeID="abc">
+        <foaf:name>Homer Simpson 2</foaf:name>
+        <foaf:age>35</foaf:age>
+        <foaf:knows rdf:nodeID="def"/>
+    </rdf:Description>
+
+    <rdf:Description rdf:nodeID="def">
+        <foaf:name>Homer Simpson 3</foaf:name>
+        <foaf:age>36</foaf:age>
+    </rdf:Description>
+
+    <rdf:Description rdf:nodeID="ghi">
+        <foaf:name>Homer Simpson 4</foaf:name>
+        <foaf:age>37</foaf:age>
+        <foaf:knows rdf:nodeID="jlm"/>
+    </rdf:Description>
+
+    <rdf:Description rdf:nodeID="jlm">
+        <foaf:name>Homer Simpson 5</foaf:name>
+        <foaf:age>38</foaf:age>
+        <foaf:knows rdf:nodeID="nop"/>
+    </rdf:Description>
+
+    <rdf:Description rdf:nodeID="nop">
+        <foaf:name>Homer Simpson 6</foaf:name>
+        <foaf:age>39</foaf:age>
+    </rdf:Description>
+
+</rdf:RDF>
