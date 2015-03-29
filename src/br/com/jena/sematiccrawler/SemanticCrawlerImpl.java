@@ -19,22 +19,25 @@ public class SemanticCrawlerImpl implements SemanticCrawler {
 	@Override
 	public void search(Model graph, String resourceURI) {
 		uriVisitadas.add(resourceURI);
-		System.out.println("[  Adicionado na lista  ] " + resourceURI);
+		System.out.println("[Adicionado na lista] " + resourceURI);
 		Model model = ModelFactory.createDefaultModel();
 		model.read(resourceURI);
 		StmtIterator triplasURISujeito = model.listStatements(
 				model.createResource(resourceURI), (Property) null,(RDFNode) null);
 		graph.add(triplasURISujeito);
-		System.out.println("[  Adicionado no Grafo  ] " + resourceURI);
+		System.out.println("[Grafo] " + resourceURI);
 		StmtIterator triplasSameAs = model.listStatements((Resource) null,OWL.sameAs, (RDFNode) null);
 		if(triplasSameAs.hasNext()){
 			for (Statement tripla : triplasSameAs.toList()) {
-				System.out.println("[      VERIFICANDO TRIPLAS --- URI: "+ resourceURI + "     ]");
+				System.out.println(">>>>> " + resourceURI + " <<<<<");
 				Resource sujeito = tripla.getSubject();
 				Resource objeto = (Resource) (tripla.getObject());
+				System.out.println(sujeito.getURI());
+
+				System.out.println("[sujeito anonimo] " + sujeito.isAnon());
+				System.out.println("[objetos anonimo] " + objeto.isAnon());
 
 				if (sujeito.isAnon()){
-					System.out.println("[  ANÔNIMO --- Sujeito  ] " + sujeito.getId());
 					if (objeto.isAnon()){
 						noBrancoSearch(graph, model, objeto);
 						continue;
@@ -43,7 +46,6 @@ public class SemanticCrawlerImpl implements SemanticCrawler {
 						continue;
 					}
 				}else if(objeto.isAnon()){
-					System.out.println("[  ANÔNIMO --- Objeto ] " + objeto.getId());
 					if(sujeito.isAnon()){
 						noBrancoSearch(graph, model, sujeito);
 						continue;
@@ -54,10 +56,10 @@ public class SemanticCrawlerImpl implements SemanticCrawler {
 				}else if (sujeito.getURI().equals(resourceURI)){
 					if (enc.canEncode(objeto.getURI())){
 						if (uriVisitadas.contains(objeto.getURI())){
-							System.out.println("[  URI VISITADA --- Objeto  ] " + objeto.getURI());
+							System.out.println("[Uri Objeto, já foi visitada] " + objeto.getURI());
 							continue;
 						}else{
-							System.out.println("[  DEREFERENCIANDO ---->> Objeto URI:  ] "+ objeto.getURI());
+							System.out.println("[Dereferenciando - Objeto]"+ objeto.getURI());
 							try {
 								search(graph, objeto.getURI());
 							} catch (Exception e) {
@@ -65,15 +67,15 @@ public class SemanticCrawlerImpl implements SemanticCrawler {
 							}
 						}
 					}else{
-						System.out.println("[  NÃO DEREFERENCIADO --- devido a URI do objeto  ] " + tripla);
+						System.out.println("[Não - derenfenciado devido objeto ] " + tripla);
 					}
 				}else if (objeto.getURI().equals(resourceURI)){
 					if (enc.canEncode(sujeito.getURI())){
 						if (uriVisitadas.contains(sujeito.getURI())){
-							System.out.println("[  URI VISITADA --- Sujeito  ] " + sujeito.getURI());
+							System.out.println("[Uri Sujeito, já foi visitada] " + sujeito.getURI());
 							continue;
 						}else{
-							System.out.println("[  DEREFERENCIANDO ---->> Sujeito URI:  ] "+ sujeito.getURI());
+							System.out.println("[Dereferenciando - sujeito]"+ sujeito.getURI());
 							try {
 								search(graph, sujeito.getURI());
 							} catch (Exception e) {
@@ -81,30 +83,30 @@ public class SemanticCrawlerImpl implements SemanticCrawler {
 							}
 						}
 					}else{
-						System.out.println("[  NÃO DEREFERENCIADO --- devido a URI do sujeito  ] " + tripla);
+						System.out.println("[Não - derenfenciado devido sujeito ] " + tripla);
 					}
 				}else{
-					System.out.println("[  NÃO DEREFERENCIADO --- devido a URI não está no padrão  ] "+ resourceURI+ " ----> "+ tripla);
+					System.out.println("[Não - derenfenciado devido não está no padrão] "+ resourceURI+ " -> "+ tripla);
 				}
 			}
 		}else{
-			System.out.println("[  NÃO TEM sameAs  ] " + resourceURI);
+			System.out.println("[Não tem sameAs] " + resourceURI);
 		}
 	}
 
 	public void noBrancoSearch(Model graphAtual, Model modelAtual, Resource noBranco){
-		System.out.println("[  NO EM BRANCO  ] " + noBranco.getId());
+		System.out.println("[NO EM BRANCO]" + noBranco.getId());
 		ArrayList<Statement> triplas = todasTriplasNoBrancoSujeito(noBranco, modelAtual);
 		graphAtual.add(triplas);
 
 		for(Statement tripla: triplas) {
 			if (tripla.getObject().isAnon()){
 				Resource objeto = (Resource)(tripla.getObject());
-				System.out.println("[  VERIFICANDO TRIPLAS --- nó BRANCO  ] " + objeto.getId());
+				System.out.println("[Dentro do nó BRANCO]" + objeto.getId());
 				noBrancoSearch(graphAtual, modelAtual, objeto);
 				continue;
 			}else{
-				System.out.println("[  NÃO É NÓ BRANCO  ] " + tripla);
+				System.out.println("[Não é um anonimo] " + tripla);
 			}
 		}
 	}
