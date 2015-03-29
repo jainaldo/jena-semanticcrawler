@@ -3,7 +3,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 
 public class Principal {
-	public static final String RDF_FILE = "http://dbpedia.org/resource/Zico";
+	public static final String RDF_FILE = "file://home/jainaldo/test.rdf";
 
 	public static void main(String[] args) {
 		Model graph = ModelFactory.createDefaultModel();
