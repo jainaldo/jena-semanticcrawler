@@ -3,7 +3,8 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 
 public class Principal {
-	public static final String RDF_FILE = "file://home/jainaldo/test.rdf";
+	public static final String RDF_FILE = "caminho do seu arquivo RDF ou sua URI";
+	//exemplo de caminho do arquivo local: file://home/nome_do_usuario/test.rdf
 
 	public static void main(String[] args) {
 		Model graph = ModelFactory.createDefaultModel();
